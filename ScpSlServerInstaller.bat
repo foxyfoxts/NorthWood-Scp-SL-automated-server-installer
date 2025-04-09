@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 set "steamcmd_url=https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip"
 set "steamcmd_dir=%~dp0steamcmd"
-set "server_dir=%steamcmd_dir%\steamapps\common\SCP Secret Laboratory Dedicated Server"
+set "server_dir=%~dp0SCP-SL-Server"
 set "total_steps=3"
 set "current_step=0"
 set "progress=0"
@@ -16,7 +16,8 @@ set "bar_empty=-"
 set "spinner_chars=|\-/"
 
 if not exist "%steamcmd_dir%" mkdir "%steamcmd_dir%"
-cd /d "%steamcmd_dir%"
+if not exist "%server_dir%" mkdir "%server_dir%"
+cd /d "%~dp0"
 
 call :initialize_display
 call :install_steamcmd
@@ -32,30 +33,29 @@ exit /b
 
 :install_steamcmd
 call :update_progress "Installing SteamCMD..."
-if exist "steamcmd.exe" (
+if exist "%steamcmd_dir%\steamcmd.exe" (
     set /a "current_step+=1"
     exit /b
 )
-if not exist "steamcmd.zip" (
-    powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%steamcmd_url%' -OutFile 'steamcmd.zip'"
+if not exist "%steamcmd_dir%\steamcmd.zip" (
+    powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%steamcmd_url%' -OutFile '%steamcmd_dir%\steamcmd.zip'"
 )
-if not exist "steamcmd.exe" (
-    powershell -Command "Expand-Archive -Path 'steamcmd.zip' -DestinationPath '%steamcmd_dir%' -Force"
+if not exist "%steamcmd_dir%\steamcmd.exe" (
+    powershell -Command "Expand-Archive -Path '%steamcmd_dir%\steamcmd.zip' -DestinationPath '%steamcmd_dir%' -Force"
 )
 set /a "current_step+=1"
 exit /b
 
 :download_server
 call :update_progress "Downloading SCP:SL Server..."
-if exist "%server_dir%" (
+if exist "%server_dir%\LocalAdmin.exe" (
     set /a "current_step+=1"
     exit /b
 )
-start "" /WAIT "%steamcmd_dir%\steamcmd.exe" +login anonymous +app_update 996560 validate +quit
+start "" /wait "%steamcmd_dir%\steamcmd.exe" +force_install_dir "%server_dir%" +login anonymous +app_update 996560 validate +quit
 if not exist "%server_dir%\LocalAdmin.exe" (
     echo.
-    echo ERROR: Failed to download LocalAdmin.exe!
-    echo Check SteamCMD output above for errors
+    echo ERROR: Failed to download server files!
     timeout /t 5
     exit /b 1
 )

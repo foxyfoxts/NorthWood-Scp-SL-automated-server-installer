@@ -194,5 +194,5 @@ exit /b
 echo.
 choice /c yn /n /m "Would you like to open the official guide? (Y/N): "
 if errorlevel 2 exit /b
-start "" "https://nwbooktest.itsgamertime.xyz/books/servers"
+start "" "https://techwiki.scpslgame.com/books/server-guides"
 exit /b
